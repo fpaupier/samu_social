@@ -24,9 +24,8 @@ def main():
     ### Should
     # hotels, employees = csv_reader.parse(HOTELS_DATA_FILE, 'hotel'), csv_reader.parse(EMPLOYEES_DATA_FILE, 'people')
     ### Should not
-    hotels, employees = csv_reader.parse_enriched(HOTELS_DATA_FILE, 'hotel'), csv_reader.parse_enriched(
-        EMPLOYEES_DATA_FILE, 'people')
-
+    hotels, employees = csv_reader.parse_enriched(HOTELS_DATA_FILE, 'hotel'), \
+                        csv_reader.parse_enriched(EMPLOYEES_DATA_FILE, 'people')
 
     # FIXME: for performances reasons, we have the latitude and longitude
     #        data already inserted in the CSV files
@@ -41,10 +40,8 @@ def main():
 
     # 2) Select a date to focus on / filter model_couples
 
-
     # 3) Call solver
     solve(hotels, len(availabilities))
-
 
     # 4) API/Mail/print to display solutions
 

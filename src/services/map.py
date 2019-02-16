@@ -9,10 +9,15 @@ class Map(object):
         self.radius = 6371  # km
 
     def distance(self, departure, arrival):
-        latitude_distance = math.radians(arrival['latitude'] - departure['latitude'])
-        longitude_distance = math.radians(arrival['longitude'] - departure['longitude'])
+        try:
+            departure_latitude, departure_longitude = float(departure['latitude']), float(departure['longitude'])
+            arrival_latitude, arrival_longitude = float(arrival['latitude']), float(arrival['longitude'])
+        except ValueError:
+            return None
+        latitude_distance = math.radians(arrival_latitude - departure_latitude)
+        longitude_distance = math.radians(arrival_longitude - departure_longitude)
         a = (math.sin(latitude_distance / 2) * math.sin(latitude_distance / 2) +
-             math.cos(math.radians(arrival['longitude'])) * math.cos(math.radians(arrival['latitude'])) *
+             math.cos(math.radians(arrival_longitude)) * math.cos(math.radians(arrival_latitude)) *
              math.sin(longitude_distance / 2) * math.sin(longitude_distance / 2))
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         d = self.radius * c

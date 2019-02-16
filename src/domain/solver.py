@@ -17,7 +17,7 @@ from src.services.map import Map
 from src.services.csv_reader import parse_csv
 
 
-def get_distances_matrix(addresses):
+def get_distances_matrix(hotels):
     """Compute the distance matrix (distance between each hotels).
     Returns a triangular matrix and the labels of the hotels.
     
@@ -28,7 +28,7 @@ def get_distances_matrix(addresses):
 
 
     Args: 
-        addresses(list[dict]): list of address, each dict has the struct
+        hotels(list[dict]): list of address, each dict has the struct
             {'address': 'Avenue Winston Churchill', 'postcode': 27000}
     Returns:
         distances(list[list[int]]): matrix of distances
@@ -40,52 +40,59 @@ def get_distances_matrix(addresses):
     labels = dict()
 
     index = 0
-    for address1 in addresses:
+    for hotel1 in hotels:
         src_address = {
-            "address": address1.get("address"),
-            "postcode": address1.get("postcode"),
+            "address": hotel1.get("address"),
+            "postcode": hotel1.get("postcode"),
         }
-        point1 = map.point(src_address)
+        # point1 = map.point(src_address)
+        point1 = hotel1['point']
         src_dist = []
-        if point1 is not None:
-            labels[index] = "{} {}".format(
-                src_address.get("address"), src_address.get("postcode")
-            )  # Store the address as labels for the node
-            index = index + 1
-            for address2 in addresses:
-                target_address = {
-                    "address": address2.get("address"),
-                    "postcode": address2.get("postcode"),
-                }
-                point2 = map.point(target_address)
-                if point2 is not None:
-                    distance = map.distance(point1, point2)
-                    distance = int(
-                        np.round(distance * 1000)
-                    )  # Distance expressed in meters
-                    src_dist.append(distance)
+        if not point1:
+            continue
+
+        labels[index] = "{} {}".format(
+            src_address.get("address"), src_address.get("postcode")
+        )  # Store the address as labels for the node
+        index = index + 1
+        for hotel2 in hotels:
+            target_address = {
+                "address": hotel2.get("address"),
+                "postcode": hotel2.get("postcode"),
+            }
+            # point2 = map.point(target_address)
+            point2 = hotel2['point']
+
+            if not point2:
+                continue
+
+            distance = map.distance(point1, point2)
+            distance = int(np.round(distance * 1000))  # Distance expressed in meters
+            src_dist.append(distance)
+
         if (point1 is not None) and (point2 is not None):
             distances.append(src_dist)
+    
     return distances, labels
 
 
 ###########################
 # Problem Data Definition #
 ###########################
-def create_data_model(addresses_source, number_workers, from_raw_data):
+def create_data_model(hotels, number_workers, from_raw_data):
     """Creates the data for the example.
     Args:
-        addresses_source(list[dict])
+        hotels(list[dict])
         number_workers(int): number of Samu Social worker available
         from_raw_data(bool):
     """
     data = {}
     # Array of distances between locations.
     if from_raw_data:
-        addresses = parse_csv(addresses_source, "hotel", write=False)
+        hotels_data = parse_csv(hotels, "hotel", write=False)
     else:
-        addresses = addresses_source
-    _distances, labels = get_distances_matrix(addresses)
+        hotels_data = hotels
+    _distances, labels = get_distances_matrix(hotels_data)
     data["distances"] = _distances
     data["num_locations"] = len(_distances)
     data["num_vehicles"] = number_workers
@@ -154,12 +161,12 @@ def print_solution(data, routing, assignment):
 ########
 # Main #
 ########
-def solve(addresses_source, number_workers, from_raw_data=False):
+def solve(hotels, number_workers, from_raw_data=False):
     """
     Entry point of the program
 
     Args:
-        addresses_source:
+        hotels:
         number_workers:
         from_raw_data (bool): should we consider the raw csv file or not
 
@@ -168,7 +175,7 @@ def solve(addresses_source, number_workers, from_raw_data=False):
 
     """
     # Instantiate the data problem.
-    data = create_data_model(addresses_source, number_workers, from_raw_data)
+    data = create_data_model(hotels, number_workers, from_raw_data)
     # Create Routing Model
     routing = pywrapcp.RoutingModel(
         data["num_locations"], data["num_vehicles"], data["depot"]
