@@ -53,9 +53,49 @@ class CsvReader(object):
                             'capacity': line[41],
                             'bedroom_number': line[43],
                             'features': sum([int(line[i]) for i, line in enumerate(reader) if i in range(62, 150)]),
+                            ### Should not
                         }
                         results.append(hotel)
 
+        return results
+
+    def parse_enriched(self, source, csv_type):
+        results = []
+
+        with open(source, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter=';')
+            data = {i: j for i, j in enumerate(reader)}
+            for i, line in data.items():
+                if csv_type == 'people' and i > 0:
+                    point = {'latitude': float(line[6]), 'longitude': float(line[8])} if (line[6] and line[8]) else None
+                    people = {
+                        'address': line[0],
+                        'area1': line[1],
+                        'area2': line[2],
+                        'area3': line[3],
+                        'area4': line[4],
+                        'availability': line[5],
+                        'license': line[7],
+                        'name': line[9],
+                        'point': point,
+                        'postcode': line[11],
+                        'surname': line[12],
+                        'time_of_day': line[13],
+                    }
+                    results.append(people)
+                if csv_type == 'hotel' and i > 0:
+                    point = {'latitude': float(line[5]), 'longitude': float(line[6])} if (line[5] and line[6]) else None
+                    hotel = {
+                        'address': line[0],
+                        'bedroom_number': line[1],
+                        'capacity': line[2],
+                        'features': line[3],
+                        'hotel_status': line[4],
+                        'nom': line[7],
+                        'point': point,
+                        'postcode': line[9],
+                    }
+                    results.append(hotel)
         return results
 
 

@@ -1,3 +1,4 @@
+import csv
 import os
 from datetime import datetime
 
@@ -7,8 +8,14 @@ from src.services.map import Map
 from src.domain.solver import solve, print_solution
 
 
-HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'hotels_subset.csv')
-EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'fichier-salarie.csv')
+
+### Should
+# HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'hotels-generalites.csv')
+# EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'fichier-salarie.csv')
+
+### Should not
+HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'enriched-hotels-generalites.csv')
+EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'enriched-fichier-salarie.csv')
 
 
 def format_solution(data, routing, assignment, couples):
@@ -39,10 +46,17 @@ def main():
     csv_reader = CsvReader()
     map = Map()
 
-    hotels, employees = csv_reader.parse(HOTELS_DATA_FILE, 'hotel'), csv_reader.parse(EMPLOYEES_DATA_FILE, 'people')
+    ### Should
+    # hotels, employees = csv_reader.parse(HOTELS_DATA_FILE, 'hotel'), csv_reader.parse(EMPLOYEES_DATA_FILE, 'people')
+    ### Should not
+    hotels, employees = csv_reader.parse_enriched(HOTELS_DATA_FILE, 'hotel'), \
+                        csv_reader.parse_enriched(EMPLOYEES_DATA_FILE, 'people')
 
+    # FIXME: for performances reasons, we have the latitude and longitude
+    #        data already inserted in the CSV files
+    ### Should
     # _enrich_entity_with_point(map, hotels)
-    _enrich_entity_with_point(map, employees)
+    # _enrich_entity_with_point(map, employees)
 
     employees = _enrich_employees_with_availabilities(employees)
 

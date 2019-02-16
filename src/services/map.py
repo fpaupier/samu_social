@@ -9,10 +9,15 @@ class Map(object):
         self.radius = 6371  # km
 
     def distance(self, departure, arrival):
-        latitude_distance = math.radians(arrival['latitude'] - departure['latitude'])
-        longitude_distance = math.radians(arrival['longitude'] - departure['longitude'])
+        try:
+            departure_latitude, departure_longitude = float(departure['latitude']), float(departure['longitude'])
+            arrival_latitude, arrival_longitude = float(arrival['latitude']), float(arrival['longitude'])
+        except ValueError:
+            return None
+        latitude_distance = math.radians(arrival_latitude - departure_latitude)
+        longitude_distance = math.radians(arrival_longitude - departure_longitude)
         a = (math.sin(latitude_distance / 2) * math.sin(latitude_distance / 2) +
-             math.cos(math.radians(arrival['longitude'])) * math.cos(math.radians(arrival['latitude'])) *
+             math.cos(math.radians(arrival_longitude)) * math.cos(math.radians(arrival_latitude)) *
              math.sin(longitude_distance / 2) * math.sin(longitude_distance / 2))
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         d = self.radius * c
@@ -20,6 +25,10 @@ class Map(object):
         return d
 
     def point(self, location):
+        # TODO: fallback to the name of the hotel and other complementary operations if we don't have the
+        #       address
+        if not location.get('address'):
+            return None
         geographic_information = self.get(location)
         geographic_information_features = geographic_information['features']
         if not geographic_information_features:
@@ -32,7 +41,7 @@ class Map(object):
         return {'latitude': latitude, 'longitude': longitude}
 
     def get(self, parameters):
-        payload = {'q': parameters['address'], 'postcode': parameters['postcode']}
+        payload = {'q': parameters.get('address'), 'postcode': parameters.get('postcode')}
         request = requests.get(self.url, params=payload)
         request.raise_for_status()
 
