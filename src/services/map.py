@@ -20,6 +20,10 @@ class Map(object):
         return d
 
     def point(self, location):
+        # TODO: fallback to the name of the hotel and other complementary operations if we don't have the
+        #       address
+        if not location.get('address'):
+            return None
         geographic_information = self.get(location)
         geographic_information_features = geographic_information['features']
         if not geographic_information_features:
@@ -32,7 +36,7 @@ class Map(object):
         return {'latitude': latitude, 'longitude': longitude}
 
     def get(self, parameters):
-        payload = {'q': parameters['address'], 'postcode': parameters['postcode']}
+        payload = {'q': parameters.get('address'), 'postcode': parameters.get('postcode')}
         request = requests.get(self.url, params=payload)
         request.raise_for_status()
 

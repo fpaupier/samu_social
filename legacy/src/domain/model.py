@@ -44,7 +44,7 @@ def create_model_assignment(persons, hotels, distances):
         for j, hotel in enumerate(hotels):
             if distances[person][hotel]:
                 assignment.AddArcWithCost(i, j, distances[person][hotel])
-    import ipdb ; ipdb.set_trace()
+
     solve_status = assignment.Solve()
     if solve_status == assignment.OPTIMAL:
         print('Total cost = ', assignment.OptimalCost())
@@ -67,7 +67,6 @@ def main():
                  'B': {'formule1': 2, 'ibis': 10, 'grand hotel': 5, 'premiere classe': 18, 'b&b': 8},
                  'C': {'formule1': 7, 'ibis': 7, 'grand hotel': 12, 'premiere classe': 6, 'b&b': 12}}
 
-    import ipdb ; ipdb.set_trace()
     create_model(persons, hotels, distances)
 
 

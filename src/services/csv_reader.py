@@ -53,9 +53,47 @@ class CsvReader(object):
                             'capacity': line[41],
                             'bedroom_number': line[43],
                             'features': sum([int(line[i]) for i, line in enumerate(reader) if i in range(62, 150)]),
+                            ### Should not
                         }
                         results.append(hotel)
 
+        return results
+
+    def parse_enriched(self, source, csv_type):
+        results = []
+
+        with open(source, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter=';')
+            data = {i: j for i, j in enumerate(reader)}
+            for i, line in data.items():
+                if csv_type == 'people' and i > 0:
+                    people = {
+                        'address': line[0],
+                        'adrea1': line[1],
+                        'adrea2': line[2],
+                        'adrea3': line[3],
+                        'adrea4': line[4],
+                        'availability': line[5],
+                        'license': line[6],
+                        'name': line[7],
+                        'point': line[8],
+                        'postcode': line[9],
+                        'surname': line[10],
+                        'time_of_day': line[11],
+                    }
+                    results.append(people)
+                if csv_type == 'hotel' and i > 0:
+                    hotel = {
+                        'address': line[0],
+                        'bedroom_number': line[1],
+                        'capacity': line[2],
+                        'features': line[3],
+                        'hotel_status': line[4],
+                        'nom': line[5],
+                        'point': line[6],
+                        'postcode': line[7],
+                    }
+                    results.append(hotel)
         return results
 
 
