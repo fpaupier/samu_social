@@ -1,4 +1,5 @@
 from src.domain.model_couple import exploration, satisfaction
+from src.domain.utils import SolverStatus
 
 
 def test_simple_couples():
@@ -19,3 +20,9 @@ def test_simple_couples():
 
     print('---- Satisfaction ----')
     satisfaction_status, satisfaction_assignments = satisfaction(persons, dispos_per_persons, maximisation)
+
+    assert satisfaction_status == SolverStatus.MODEL_SAT
+    for config in satisfaction_assignments:
+        expected_couples = [{'Pop', 'Em'}, {'E', 'Palpal'}, {'E', 'Em'}, {'Pop', 'Palpal'}]
+        for couple in config.keys():
+            assert set(couple) in expected_couples

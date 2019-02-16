@@ -4,6 +4,7 @@ class SolverStatus(object):
     """
     OPTIMAL = 'OPTIMAL'
     FEASIBLE = 'FEASIBLE'
+    MODEL_SAT = 'MODEL_SAT'
     INFEASIBLE = 'INFEASIBLE'
     MODEL_INVALID = 'MODEL_INVALID'
     UNKNOWN = 'UNKNOWN'
