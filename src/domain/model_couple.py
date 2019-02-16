@@ -63,15 +63,18 @@ def exploration(persons, dispos_per_persons):
     list_of_couples = create_couples(persons)
     model, couples, dispos_per_persons, dispos_per_couples = create_model(persons, list_of_couples, dispos_per_persons)
 
-    model.Maximize(sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)))
-    # model.Maximize(sum(len(dispos_per_couples[tuple({p1,p2})])*couples[tuple({p1,p2})] for p1 in persons for p2 in persons))
+    # model.Maximize(sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)))
 
+    max_dispo = max(len(dispos_per_couples[i]) for i in range(len(list_of_couples)))
+    model.Maximize(sum(max_dispo*couples[i] for i, couple in enumerate(list_of_couples))
+                   + sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)))
 
     solver = cp_model.CpSolver()
     status = solver.Solve(model)
     status = solver.StatusName(status)
 
     if SolverStatus.success(status):
+        print('Found {} couples'.format(solver.ObjectiveValue()))
         return status, print_solutions(solver, list_of_couples, couples, dispos_per_couples), solver.ObjectiveValue()
 
     else:
@@ -110,7 +113,11 @@ def satisfaction(persons, dispos_per_persons, maximisation):
     list_of_couples = create_couples(persons)
     model, couples, dispos_per_persons, dispos_per_couples = create_model(persons, list_of_couples, dispos_per_persons)
 
-    model.Add(sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)) == int(maximisation))
+    # model.Add(sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)) == int(maximisation))
+
+    max_dispo = max(len(dispos_per_couples[i]) for i in range(len(list_of_couples)))
+    model.Add(sum(max_dispo*couples[i] for i, couple in enumerate(list_of_couples))
+             + sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)) == int(maximisation))
 
     solution_printer = VarArrayAndObjectiveSolutionPrinter(couples, list_of_couples, dispos_per_couples)
     solver = cp_model.CpSolver()
@@ -135,30 +142,13 @@ def print_solutions(solver, list_of_couples, couples, dispos_per_couples):
     return assigments
 
 
-def main():
-    data_directory = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'fichier-salarie.csv')
-    data = read_employees_file(data_directory)
-    persons = [x['name'] for x in data]
-    dispos_per_persons = {x['name']: x['availabilities'] for x in data}
-
-    # persons = ['Em',
-    #            'Pop',
-    #            'E',
-    #            'Palpal',
-    #            ]
-    # dispos_per_persons = {'Em': [[1,4],[4,8],[12, 16]],
-    #                       'Pop': [[1,4],[12,16],[16, 20]],
-    #                       'E': [[4,8],[12,16],[16, 20]],
-    #                       'Palpal': [[12,16],[16, 20]],
-    #                       }
+def solve_couples(employees):
+    persons, disponibility_per_persons = [p['name'] for p in employees], {p['name']: p['availabilities'] for p in employees}
 
     print('---- Exploration ----')
-    exploration_status, exploration_assignments, maximisation = exploration(persons, dispos_per_persons)
+    exploration_status, exploration_assignments, maximisation = exploration(persons, disponibility_per_persons)
 
     print('---- Satisfaction ----')
-    satisfaction_status, satisfaction_assignments = satisfaction(persons, dispos_per_persons, maximisation)
+    satisfaction_status, satisfaction_assignments = satisfaction(persons, disponibility_per_persons, maximisation)
 
-
-if __name__ == "__main__":
-    main()
-
+    return satisfaction_assignments

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from src.domain.model_couple import exploration, satisfaction
+from src.domain.model_couple import solve_couples
 from src.services.csv_reader import CsvReader
 from src.services.map import Map
 
@@ -21,17 +21,13 @@ def main():
     employees = _enrich_employees_with_availabilities(employees)
 
     # 1) Call model couple
+    availability = solve_couples(employees)
 
-    persons, disponibility_per_persons = [p['name'] for p in employees], {p['name']: p['availabilities'] for p in employees}
-
-    print('---- Exploration ----')
-    exploration_status, exploration_assignments, maximisation = exploration(persons, disponibility_per_persons)
-
-    print('---- Satisfaction ----')
-    satisfaction_status, satisfaction_assignments = satisfaction(persons, disponibility_per_persons, maximisation)
     # 2) Select a date to focus on / filter model_couples
 
+
     # 3) Call solver
+
 
     # 4) API/Mail/print to display solutions
 
