@@ -14,12 +14,48 @@
 """
 
 import csv
-import os
 import argparse
 import json
 
 
-dirname = os.path.dirname(__file__)
+class CsvReader(object):
+    def parse(self, source, csv_type):
+        results = []
+
+        with open(source, "r", encoding="utf-8") as f:
+            reader = csv.reader(f, delimiter=";")
+            for i, line in enumerate(reader):
+                if csv_type == "people" and i > 0:
+                    formatted_address = '{} {} {} {}'.format(line[2], line[3], line[4], line[5])
+                    people = {
+                        'name': line[0],
+                        'surname': line[1],
+                        'address': ' '.join(formatted_address.split()),
+                        'postcode': line[6],
+                        'license': line[7],
+                        'availability': line[8],
+                        'time_of_day': line[9],
+                        'area1': line[10],
+                        'area2': line[11],
+                        'area3': line[12],
+                        'area4': line[13],
+                    }
+                    results.append(people)
+                if csv_type == "hotel" and i > 0:
+                    if line[2] == "0":  # Only consider non removed hotel
+                        formatted_address = "{} {}".format(line[7], line[9])
+                        hotel = {
+                            'hotel_status': line[2],
+                            'nom': line[6],
+                            'address': ' '.join(formatted_address.split()),
+                            'postcode': line[8],
+                            'capacity': line[41],
+                            'bedroom_number': line[43],
+                            'features': sum([int(line[i]) for i, line in enumerate(reader) if i in range(62, 150)]),
+                        }
+                        results.append(hotel)
+
+        return results
 
 
 def parse_csv(source, csv_type, write=False):
