@@ -3,14 +3,15 @@ import os
 from src.services.csv_reader import CsvReader
 from src.services.map import Map
 
-HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'hotels-generalites.csv')
-EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'fichier-salarie.csv')
+HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'hotels-generalites.csv')
+EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'fichier-salarie.csv')
 
 
 def main():
     csv_reader = CsvReader()
-    hotels, employees = csv_reader.parse(HOTELS_DATA_FILE, 'hotel'), csv_reader.parse(EMPLOYEES_DATA_FILE, 'people')
     map = Map()
+
+    hotels, employees = csv_reader.parse(HOTELS_DATA_FILE, 'hotel'), csv_reader.parse(EMPLOYEES_DATA_FILE, 'people')
 
     _enrich_entity_with_point(map, hotels)
     _enrich_entity_with_point(map, employees)
@@ -22,9 +23,9 @@ def main():
     # 3) Call solver
 
     # 4) API/Mail/print to display solutions
-    
 
-# /!\ Careful: closure/impure function
+
+# /!\ Careful: impure function
 def _enrich_entity_with_point(map, entity):
     entity_address_and_postcode = {
         'address': entity.get('address'),
@@ -34,5 +35,5 @@ def _enrich_entity_with_point(map, entity):
     entity['point'] = point
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
