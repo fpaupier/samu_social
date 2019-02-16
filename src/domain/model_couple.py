@@ -1,4 +1,6 @@
 from ortools.sat.python import cp_model
+
+from src.domain.availability_model import read_employees_file
 from src.domain.utils import SolverStatus
 
 RESULTS_COUNT_LIMIT = 10
@@ -109,11 +111,16 @@ def print_solutions(solver, persons, couples, dispos_per_couples):
 
 
 def main():
-    persons = ['Em', 'Pop', 'E', 'Palpal']
-    dispos_per_persons = {'Em': [[1,4],[4,8],[12, 16]],
-                          'Pop': [[1,4],[12,16],[16, 20]],
-                          'E': [[4,8],[12,16],[16, 20]],
-                          'Palpal': [[12,16],[16, 20]]}
+    # import ipdb; ipdb.set_trace()
+    data = read_employees_file('/Users/emericbris/Downloads/55/fichier-salarie.csv')
+    persons = [x['name'] for x in data]
+    dispos_per_persons = {x['name']: x['availabilities'] for x in data}
+
+    # persons = ['Em', 'Pop', 'E', 'Palpal']
+    # dispos_per_persons = {'Em': [[1,4],[4,8],[12, 16]],
+    #                       'Pop': [[1,4],[12,16],[16, 20]],
+    #                       'E': [[4,8],[12,16],[16, 20]],
+    #                       'Palpal': [[12,16],[16, 20]]}
 
     print('---- Exploration ----')
     exploration_status, exploration_assignments, maximisation = exploration(persons, dispos_per_persons)
