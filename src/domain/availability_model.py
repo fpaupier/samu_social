@@ -26,13 +26,13 @@ def process_employee_availability(employee):
     if time_of_day.strip().lower() == 'jour':
         morning, afternoon = '{}{}{}{}'.format(availability.year, availability.month, availability.day, 0), \
                              '{}{}{}{}'.format(availability.year, availability.month, availability.day, 1)
-        return [morning, afternoon]
+        return [int(morning), int(afternoon)]
     elif time_of_day.strip().lower() == 'matin':
         morning = '{}{}{}{}'.format(availability.year, availability.month, availability.day, 0)
-        return [morning]
+        return [int(morning)]
     else:
         afternoon = '{}{}{}{}'.format(availability.year, availability.month, availability.day, 0)
-        return [afternoon]
+        return [int(afternoon)]
 
 
 if __name__ == '__main__':
