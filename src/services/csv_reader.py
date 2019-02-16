@@ -58,8 +58,13 @@ def parse_csv(source, csv_type, write=False):
                 if line[2] == "0":  # Only consider non removed hotel
                     formatted_address = "{} {}".format(line[7], line[9])
                     hotel = {
+                        'hotel_status': line[2],
+                        'nom': line[6],
                         'address': ' '.join(formatted_address.split()),
                         'postcode': line[8],
+                        'capacity': line[41],
+                        'bedroom_number': line[43],
+                        'features': sum([int(line[i]) for i, line in enumerate(reader) if i in range(62, 150)]),
                     }
                     results.append(hotel)
 
@@ -86,4 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--source", help="path to the source csv file", type=str)
 
     args = parser.parse_args()
-    parse_csv(args.source, args.csv_type, write=True)
+
+    data = parse_csv(args.source, args.csv_type, write=False)
+
+    print(data)
