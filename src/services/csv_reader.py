@@ -57,6 +57,7 @@ def parse_csv(source, csv_type, write=False):
             if csv_type == "hotel" and i > 0:
                 if line[2] == "0":  # Only consider non removed hotel
                     results.append("{} {} {}".format(line[7], line[8], line[9]))
+
         for row in reader:
             import ipdb; ipdb.set_trace()
             full_address = '{} {} {} {}'.format(row[2], row[3], row[4], row[5])
