@@ -72,15 +72,19 @@ def get_distances_matrix(addresses):
 ###########################
 # Problem Data Definition #
 ###########################
-def create_data_model(addresses_source, number_workers):
+def create_data_model(addresses_source, number_workers, from_raw_data):
     """Creates the data for the example.
     Args:
         addresses_source(list[dict])
         number_workers(int): number of Samu Social worker available
+        from_raw_data(bool):
     """
     data = {}
     # Array of distances between locations.
-    addresses = parse_csv(addresses_source, "hotel", write=False)
+    if from_raw_data:
+        addresses = parse_csv(addresses_source, "hotel", write=False)
+    else:
+        addresses = addresses_source
     _distances, labels = get_distances_matrix(addresses)
     data["distances"] = _distances
     data["num_locations"] = len(_distances)
@@ -150,10 +154,21 @@ def print_solution(data, routing, assignment):
 ########
 # Main #
 ########
-def main(addresses_source, number_workers):
-    """Entry point of the program"""
+def solve(addresses_source, number_workers, from_raw_data=False):
+    """
+    Entry point of the program
+
+    Args:
+        addresses_source:
+        number_workers:
+        from_raw_data (bool): should we consider the raw csv file or not
+
+    Returns:
+
+
+    """
     # Instantiate the data problem.
-    data = create_data_model(addresses_source, number_workers)
+    data = create_data_model(addresses_source, number_workers, from_raw_data)
     # Create Routing Model
     routing = pywrapcp.RoutingModel(
         data["num_locations"], data["num_vehicles"], data["depot"]
@@ -194,4 +209,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    main(args.source, args.number_workers)
+    solve(args.source, args.number_workers, from_raw_data=True)

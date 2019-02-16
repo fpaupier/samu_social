@@ -4,8 +4,9 @@ from datetime import datetime
 from src.domain.model_couple import solve_couples
 from src.services.csv_reader import CsvReader
 from src.services.map import Map
+from src.domain.solver import solve
 
-HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'hotels-generalites.csv')
+HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'hotels_subset.csv')
 EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'fichier-salarie.csv')
 
 
@@ -21,12 +22,13 @@ def main():
     employees = _enrich_employees_with_availabilities(employees)
 
     # 1) Call model couple
-    availability = solve_couples(employees)
+    availabilities = solve_couples(employees)
 
     # 2) Select a date to focus on / filter model_couples
 
 
     # 3) Call solver
+    solve(hotels, len(availabilities))
 
 
     # 4) API/Mail/print to display solutions
