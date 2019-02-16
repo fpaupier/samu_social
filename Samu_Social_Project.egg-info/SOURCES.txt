@@ -1,0 +1,6 @@
+README.md
+setup.py
+Samu_Social_Project.egg-info/PKG-INFO
+Samu_Social_Project.egg-info/SOURCES.txt
+Samu_Social_Project.egg-info/dependency_links.txt
+Samu_Social_Project.egg-info/top_level.txt
