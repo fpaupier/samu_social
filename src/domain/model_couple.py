@@ -1,8 +1,5 @@
-import os
-
 from ortools.sat.python import cp_model
 
-from src.domain.availability_model import read_employees_file
 from src.domain.utils import SolverStatus
 
 RESULTS_COUNT_LIMIT = 10
@@ -30,11 +27,20 @@ def create_couples(persons):
 def create_model(persons, list_of_couples, dispos_per_person):
     """
     Build the model
+
+    Args:
+        persons (list[str]):
+        list_of_couples (list[set(str)]):
+        dispos_per_person (dict[str: list[int]):
+
+    Returns:
+        model (CpModel),
+        couples (dict[int: NewBoolVar]),
+        dispos_per_couples (dict[int: list[int]]):
     """
 
     model = cp_model.CpModel()
 
-    print(list_of_couples)
     couples = {}
     dispos_per_couples = {}
     for i, couple in enumerate(list_of_couples):
@@ -55,13 +61,24 @@ def create_model(persons, list_of_couples, dispos_per_person):
     for p1 in persons:
         model.Add(sum(couples[i] for i, couple in enumerate(list_of_couples) if p1 in couple) <= 1)
 
-    return model, couples, dispos_per_couples, dispos_per_couples
+    return model, couples, dispos_per_couples
 
 
 def exploration(persons, dispos_per_persons):
+    """
+    First iteration of the solver, that find the cost of the best configuration possible
 
+    Args:
+        persons (list[str]):
+        dispos_per_person (dict[str: list[int]):
+
+    Returns:
+        status (str),
+        assignments(dict[tuple(str,str): list[int]),
+        maximisation (int):
+    """
     list_of_couples = create_couples(persons)
-    model, couples, dispos_per_persons, dispos_per_couples = create_model(persons, list_of_couples, dispos_per_persons)
+    model, couples, dispos_per_couples = create_model(persons, list_of_couples, dispos_per_persons)
 
     # model.Maximize(sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)))
 
@@ -74,8 +91,7 @@ def exploration(persons, dispos_per_persons):
     status = solver.StatusName(status)
 
     if SolverStatus.success(status):
-        print('Found {} couples'.format(solver.ObjectiveValue()))
-        return status, print_solutions(solver, list_of_couples, couples, dispos_per_couples), solver.ObjectiveValue()
+        return status, save_solutions(solver, list_of_couples, couples, dispos_per_couples), solver.ObjectiveValue()
 
     else:
         print('Cannot find couples :\'(')
@@ -96,22 +112,34 @@ class VarArrayAndObjectiveSolutionPrinter(cp_model.CpSolverSolutionCallback):
 
     def save_solutions(self, solution):
         print('Solution {}'.format(self.__solution_count))
-        assignments = print_solutions(self, self.list_of_couples, solution, self.dispos_per_couples)
+        assignments = save_solutions(self, self.list_of_couples, solution, self.dispos_per_couples)
         self.solutions.append(assignments)
 
     def NewSolution(self):
         self.__solution_count += 1
         self.save_solutions(self.__variables)
         # if self.__solution_count >= self.__solution_limit:
-        #     self.StopSearch()
+        #     self.StopSearch() # TODO implemetn
 
     def solution_count(self):
         return self.__solution_count
 
 
 def satisfaction(persons, dispos_per_persons, maximisation):
+    """
+    Second iteration of the solver, that finds all configurations of couple, respecting the given maximisation cost
+
+    Args:
+        persons (list[str]):
+        dispos_per_person (dict[str: list[int]):
+        maximisation (int):
+
+    Returns:
+        status (str),
+        assignments (list[dict[tuple(str,str): list[int]]]])
+    """
     list_of_couples = create_couples(persons)
-    model, couples, dispos_per_persons, dispos_per_couples = create_model(persons, list_of_couples, dispos_per_persons)
+    model, couples, dispos_per_couples = create_model(persons, list_of_couples, dispos_per_persons)
 
     # model.Add(sum(len(dispos_per_couples[i])*couples[i] for i, couple in enumerate(list_of_couples)) == int(maximisation))
 
@@ -131,7 +159,20 @@ def satisfaction(persons, dispos_per_persons, maximisation):
     return status, assignements
 
 
-def print_solutions(solver, list_of_couples, couples, dispos_per_couples):
+def save_solutions(solver, list_of_couples, couples, dispos_per_couples):
+    """
+    Print and Save solutions
+
+    Args:
+        solver (CpModel):
+        list_of_couples (list[set(str)]):
+        couples (couples (dict[int: NewBoolVar])):
+        dispos_per_person (dict[str: list[int]):
+
+    Returns:
+        assignments (list[dict[tuple(str,str): list[int]]]])
+    """
+
     assigments = {}
     assigned_couples = [(i, couple) for i, couple in enumerate(list_of_couples) if solver.Value(couples[i])]
 
