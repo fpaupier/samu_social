@@ -1,5 +1,10 @@
 """
 Determine an optimal list of hotel to visit.
+    ```
+    $ python src/domain/solver.py \
+        -s "/Users/fpaupier/projects/samu_social/data/hotels_subset.csv
+    ```
+    Note that the first record should be the adress of the starting point (let's say the HQ of the Samu Social)
 """
 import argparse
 import numpy as np
@@ -47,14 +52,13 @@ def get_distances_matrix(addresses):
             distance = int(np.round(distance * 1000))  # Work with distance expressed in meters
             src_dist.append(distance)
         distances.append(src_dist)
-    #import ipdb; ipdb.set_trace()
     return distances
 
 
 ###########################
 # Problem Data Definition #
 ###########################
-def create_data_model(addresses_source):
+def create_data_model(addresses_source, number_workers):
     """Creates the data for the example.
     Args:
         addresses_source(list[dict])
@@ -65,7 +69,7 @@ def create_data_model(addresses_source):
     _distances = get_distances_matrix(addresses)
     data["distances"] = _distances
     data["num_locations"] = len(_distances)
-    data["num_vehicles"] = 4  # FIXME: Do not hardcode number of vehicles - dynamic arg
+    data["num_vehicles"] = number_workers  # FIXME: Do not hardcode number of vehicles - dynamic arg
     data["depot"] = 0
     return data
 
@@ -87,7 +91,7 @@ def create_distance_callback(data):
 def add_distance_dimension(routing, distance_callback):
     """Add Global Span constraint"""
     distance = "Distance"
-    maximum_distance = 300000  # Maximum distance per vehicle.
+    maximum_distance = 300000  # Maximum distance per vehicle expressed in meters
     routing.AddDimension(
         distance_callback,
         0,  # null slack
@@ -130,10 +134,10 @@ def print_solution(data, routing, assignment):
 ########
 # Main #
 ########
-def main(addresses_source):
+def main(addresses_source, number_workers):
     """Entry point of the program"""
     # Instantiate the data problem.
-    data = create_data_model(addresses_source)
+    data = create_data_model(addresses_source, number_workers)
     # Create Routing Model
     routing = pywrapcp.RoutingModel(
         data["num_locations"], data["num_vehicles"], data["depot"]
@@ -154,10 +158,19 @@ def main(addresses_source):
 
 
 if __name__ == "__main__":
+    """
+    Solve a Vehicle Routing Problem
+
+    Note:
+        The first record should be the adress of the starting point (let's say the HQ of the Samu Social)
+
+    """
     parser = argparse.ArgumentParser(
         description="Solve a Vehicle Routing Problem"
     )
     parser.add_argument("-s", "--source", help="path to the source address csv file", type=str)
+    parser.add_argument("-n", "--number_workers", help="Number of workers available to perform the visit", type=int, default=4)
+
 
     args = parser.parse_args()
-    main(args.source)
+    main(args.source, args.number_workers)
