@@ -19,7 +19,7 @@ from src.services.csv_reader import parse_csv
 
 def get_distances_matrix(addresses):
     """Compute the distance matrix (distance between each hotels).
-    Returns a triangular matrix.
+    Returns a triangular matrix and the labels of the hotels.
     
     Note:
         1) That the first address shall be the address of the depot.
@@ -32,11 +32,14 @@ def get_distances_matrix(addresses):
             {'address': 'Avenue Winston Churchill', 'postcode': 27000}
     Returns:
         distances(list[list[int]]): matrix of distances
+        labels(dict[int, string]): the index of the address and it's name
 
     """
     map = Map()
     distances = []
+    labels = dict()
 
+    index = 0
     for address1 in addresses:
         src_address = {
             "address": address1.get("address"),
@@ -45,6 +48,10 @@ def get_distances_matrix(addresses):
         point1 = map.point(src_address)
         src_dist = []
         if point1 is not None:
+            labels[index] = "{} {}".format(
+                src_address.get("address"), src_address.get("postcode")
+            )  # Store the address as labels for the node
+            index = index + 1
             for address2 in addresses:
                 target_address = {
                     "address": address2.get("address"),
@@ -53,11 +60,13 @@ def get_distances_matrix(addresses):
                 point2 = map.point(target_address)
                 if point2 is not None:
                     distance = map.distance(point1, point2)
-                    distance = int(np.round(distance * 1000))  # Distance expressed in meters
+                    distance = int(
+                        np.round(distance * 1000)
+                    )  # Distance expressed in meters
                     src_dist.append(distance)
-        if (point1 is not None) and (point2 is not None): 
+        if (point1 is not None) and (point2 is not None):
             distances.append(src_dist)
-    return distances
+    return distances, labels
 
 
 ###########################
@@ -67,15 +76,17 @@ def create_data_model(addresses_source, number_workers):
     """Creates the data for the example.
     Args:
         addresses_source(list[dict])
+        number_workers(int): number of Samu Social worker available
     """
     data = {}
     # Array of distances between locations.
     addresses = parse_csv(addresses_source, "hotel", write=False)
-    _distances = get_distances_matrix(addresses)
+    _distances, labels = get_distances_matrix(addresses)
     data["distances"] = _distances
     data["num_locations"] = len(_distances)
-    data["num_vehicles"] = number_workers  # FIXME: Do not hardcode number of vehicles - dynamic arg
+    data["num_vehicles"] = number_workers
     data["depot"] = 0
+    data["labels"] = labels
     return data
 
 
@@ -127,9 +138,9 @@ def print_solution(data, routing, assignment):
             route_dist += routing.GetArcCostForVehicle(
                 node_index, next_node_index, vehicle_id
             )
-            plan_output += " {0} ->".format(node_index)
+            plan_output += " {0} ->".format(data["labels"].get(node_index))
             index = assignment.Value(routing.NextVar(index))
-        plan_output += " {}\n".format(routing.IndexToNode(index))
+        plan_output += " {}\n".format(data["labels"].get(routing.IndexToNode(index)))
         plan_output += "Distance of route: {}m\n".format(route_dist)
         print(plan_output)
         total_distance += route_dist
@@ -167,15 +178,20 @@ if __name__ == "__main__":
     Solve a Vehicle Routing Problem
 
     Note:
-        The first record should be the adress of the starting point (let's say the HQ of the Samu Social)
+        The first record should be the address of the starting point (let's say the HQ of the Samu Social)
 
     """
-    parser = argparse.ArgumentParser(
-        description="Solve a Vehicle Routing Problem"
+    parser = argparse.ArgumentParser(description="Solve a Vehicle Routing Problem")
+    parser.add_argument(
+        "-s", "--source", help="path to the source address csv file", type=str
     )
-    parser.add_argument("-s", "--source", help="path to the source address csv file", type=str)
-    parser.add_argument("-n", "--number_workers", help="Number of workers available to perform the visit", type=int, default=4)
-
+    parser.add_argument(
+        "-n",
+        "--number_workers",
+        help="Number of workers available to perform the visit",
+        type=int,
+        default=4,
+    )
 
     args = parser.parse_args()
     main(args.source, args.number_workers)
