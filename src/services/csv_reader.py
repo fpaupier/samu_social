@@ -1,4 +1,17 @@
-### Parse CSV to extract addresses
+"""
+ Parse CSV to extract addresses
+
+ How to use the `csv_reader` script:
+
+ 1) Save the xls data file as a csv in UTF8 encoding
+ 2) Call othe script by specifyng the type of source (hotel or people)
+  ```
+  $  python src/services/csv_reader.py \
+      -t "hotel" \
+      -s "/Users/fpaupier/projects/samu_social/data/hotels-generalites.csv"
+  ```
+ 3) A json file with the list of adresses is generated.
+"""
 
 import csv
 import os
