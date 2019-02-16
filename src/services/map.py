@@ -22,6 +22,8 @@ class Map(object):
     def point(self, location):
         geographic_information = self.get(location)
         geographic_information_features = geographic_information['features']
+        if not geographic_information_features:
+            return None
         best_score_geophic_information = sorted(
             geographic_information_features,
             key=lambda k: k['properties']['score']
