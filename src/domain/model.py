@@ -30,7 +30,6 @@ def create_model(persons, hotels, distances):
     return status, assignment
 
 
-
 def create_model_assignment(persons, hotels, distances):
     """
     Model using assigment N - N
@@ -70,6 +69,7 @@ def main():
 
     import ipdb ; ipdb.set_trace()
     create_model(persons, hotels, distances)
+
 
 if __name__ == "__main__":
     main()
