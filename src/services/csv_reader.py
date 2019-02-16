@@ -24,7 +24,8 @@ class CsvReader(object):
 
         with open(source, "r", encoding="utf-8") as f:
             reader = csv.reader(f, delimiter=";")
-            for i, line in enumerate(reader):
+            data = {i: j for i, j in enumerate(reader)}
+            for i, line in data.items():
                 if csv_type == "people" and i > 0:
                     formatted_address = '{} {} {} {}'.format(line[2], line[3], line[4], line[5])
                     people = {
@@ -73,7 +74,8 @@ def parse_csv(source, csv_type, write=False):
     results = []
     with open(source, "r", encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=";")
-        for i, line in enumerate(reader):
+        data = {i: j for i, j in enumerate(reader)}
+        for i, line in data.items():
             if csv_type == "people" and i > 0:
                 formatted_address = '{} {} {} {}'.format(line[2], line[3], line[4], line[5])
                 people = {
