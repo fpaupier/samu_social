@@ -22,7 +22,10 @@ def get_distances_matrix(addresses):
     Returns a triangular matrix.
     
     Note:
-        That the first address shall be the address of the depot.
+        1) That the first address shall be the address of the depot.
+        2) If the API doesn't returna a match for the address, we drop
+            the point. This may not be the expected behavior. TODO 
+
 
     Args: 
         addresses(list[dict]): list of address, each dict has the struct
@@ -39,19 +42,21 @@ def get_distances_matrix(addresses):
             "address": address1.get("address"),
             "postcode": address1.get("postcode"),
         }
+        point1 = map.point(src_address)
         src_dist = []
-        for address2 in addresses:
-            target_address = {
-                "address": address2.get("address"),
-                "postcode": address2.get("postcode"),
-            }
-            point1 = map.point(src_address)
-            point2 = map.point(target_address)
-
-            distance = map.distance(point1, point2)
-            distance = int(np.round(distance * 1000))  # Work with distance expressed in meters
-            src_dist.append(distance)
-        distances.append(src_dist)
+        if point1 is not None:
+            for address2 in addresses:
+                target_address = {
+                    "address": address2.get("address"),
+                    "postcode": address2.get("postcode"),
+                }
+                point2 = map.point(target_address)
+                if point2 is not None:
+                    distance = map.distance(point1, point2)
+                    distance = int(np.round(distance * 1000))  # Distance expressed in meters
+                    src_dist.append(distance)
+        if (point1 is not None) and (point2 is not None): 
+            distances.append(src_dist)
     return distances
 
 
