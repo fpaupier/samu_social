@@ -1,5 +1,3 @@
-import sys
-
 from ortools.sat.python import cp_model
 
 from src.domain.availability_model import read_employees_file
@@ -73,7 +71,7 @@ class VarArrayAndObjectiveSolutionPrinter(cp_model.CpSolverSolutionCallback):
         print('Solution {}'.format(self.__solution_count))
         assignments = print_solutions(self, self.persons, solution, self.dispos_per_couples)
         self.solutions.append(assignments)
-    if sys.
+
     def NewSolution(self):
         self.__solution_count += 1
         self.save_solutions(self.__variables)
@@ -113,9 +111,10 @@ def print_solutions(solver, persons, couples, dispos_per_couples):
 
 
 def main():
-    # data = read_employees_file('/Users/emericbris/Downloads/55/fichier-salarie.csv')
-    # persons = [x['name'] for x in data]
-    # dispos_per_persons = {x['name']: x['availabilities'] for x in data}
+    # import ipdb; ipdb.set_trace()
+    data = read_employees_file('/Users/emericbris/Downloads/55/fichier-salarie.csv')
+    persons = [x['name'] for x in data]
+    dispos_per_persons = {x['name']: x['availabilities'] for x in data}
 
     persons = ['Em', 'Pop', 'E', 'Palpal']
     dispos_per_persons = {'Em': [[1,4],[4,8],[12, 16]],
