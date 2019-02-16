@@ -10,7 +10,6 @@ EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', '..', 'data'
 def main():
     csv_reader = CsvReader()
     hotels, employees = csv_reader.parse(HOTELS_DATA_FILE, 'hotel'), csv_reader.parse(EMPLOYEES_DATA_FILE, 'people')
-
     map = Map()
 
     _enrich_entity_with_point(map, hotels)
@@ -33,3 +32,7 @@ def _enrich_entity_with_point(map, entity):
     }
     point = map.point(entity_address_and_postcode)
     entity['point'] = point
+
+
+if __name__ == "__main__":
+    main()
