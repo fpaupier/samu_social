@@ -20,14 +20,14 @@ from src.services.csv_reader import parse_csv
 def get_distances_matrix(addresses):
     """Compute the distance matrix (distance between each hotels).
     Returns a triangular matrix and the labels of the hotels.
-    
+
     Note:
         1) That the first address shall be the address of the depot.
         2) If the API doesn't returna a match for the address, we drop
-            the point. This may not be the expected behavior. TODO 
+            the point. This may not be the expected behavior. TODO
 
 
-    Args: 
+    Args:
         addresses(list[dict]): list of address, each dict has the struct
             {'address': 'Avenue Winston Churchill', 'postcode': 27000}
     Returns:
@@ -129,10 +129,11 @@ def add_distance_dimension(routing, distance_callback):
 ###########
 def print_solution(data, routing, assignment):
     """Print routes on console."""
-    total_distance = 0
+    plan_output = dict()
     for vehicle_id in range(data["num_vehicles"]):
+        plan_output[vehicle_id] = []
+        route = []
         index = routing.Start(vehicle_id)
-        plan_output = "Route for vehicle {}:\n".format(vehicle_id)
         route_dist = 0
         while not routing.IsEnd(index):
             node_index = routing.IndexToNode(index)
@@ -142,13 +143,12 @@ def print_solution(data, routing, assignment):
             route_dist += routing.GetArcCostForVehicle(
                 node_index, next_node_index, vehicle_id
             )
-            plan_output += " {0} ->".format(data["labels"].get(node_index))
+            route.append(("{0}".format(data["labels"].get(node_index))))
             index = assignment.Value(routing.NextVar(index))
-        plan_output += " {}\n".format(data["labels"].get(routing.IndexToNode(index)))
-        plan_output += "Distance of route: {}m\n".format(route_dist)
-        print(plan_output)
-        total_distance += route_dist
-    print("Total distance of all routes: {}m".format(total_distance))
+        # Add return address to the route
+        route.append((data["labels"].get(routing.IndexToNode(index))))
+        plan_output[vehicle_id] = route
+    return plan_output
 
 
 ########
@@ -185,7 +185,10 @@ def solve(addresses_source, number_workers, from_raw_data=False):
     # Solve the problem.
     assignment = routing.SolveWithParameters(search_parameters)
     if assignment:
-        print_solution(data, routing, assignment)
+        itinerary = print_solution(data, routing, assignment)
+        return itinerary
+    else:
+        return None
 
 
 if __name__ == "__main__":

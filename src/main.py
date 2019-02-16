@@ -4,10 +4,35 @@ from datetime import datetime
 from src.domain.model_couple import solve_couples
 from src.services.csv_reader import CsvReader
 from src.services.map import Map
-from src.domain.solver import solve
+from src.domain.solver import solve, print_solution
+
 
 HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'hotels_subset.csv')
 EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'fichier-salarie.csv')
+
+
+def format_solution(data, routing, assignment, couples):
+    """Print routes on console."""
+    total_distance = 0
+    for vehicle_id in range(data["num_vehicles"]):
+        index = routing.Start(vehicle_id)
+        plan_output = "Route for vehicle {}:\n".format(couples[vehicle_id])
+        route_dist = 0
+        while not routing.IsEnd(index):
+            node_index = routing.IndexToNode(index)
+            next_node_index = routing.IndexToNode(
+                assignment.Value(routing.NextVar(index))
+            )
+            route_dist += routing.GetArcCostForVehicle(
+                node_index, next_node_index, vehicle_id
+            )
+            plan_output += " {0} ->".format(data["labels"].get(node_index))
+            index = assignment.Value(routing.NextVar(index))
+        plan_output += " {}\n".format(data["labels"].get(routing.IndexToNode(index)))
+        plan_output += "Distance of route: {}m\n".format(route_dist)
+        print(plan_output)
+        total_distance += route_dist
+    print("Total distance of all routes: {}m".format(total_distance))
 
 
 def main():
@@ -26,10 +51,19 @@ def main():
 
     # 2) Select a date to focus on / filter model_couples
 
-
     # 3) Call solver
-    solve(hotels, len(availabilities))
+    num_pairs = len(availabilities[0])  # TODO: Handle several configurations
 
+    itinerary = solve(hotels, num_pairs)
+    couples = [couple for couple in availabilities[0].keys()]
+
+    named_routes = dict()
+    i = 0
+    for k, v in itinerary.items():
+        named_routes[couples[i]] = v
+        i = i + 1
+
+    return named_routes
 
     # 4) API/Mail/print to display solutions
 
