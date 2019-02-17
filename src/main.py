@@ -77,6 +77,9 @@ def main():
 
     # 4) API/Mail/print to display solutions
     # TODO
+
+    # Print for debug purposes
+    [print("{}\n".format(item)) for item in named_routes.items()]
     return named_routes
 
 
