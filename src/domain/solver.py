@@ -20,7 +20,7 @@ MAX_DISTANCE = 15000  # Maximum distance (meters) that a worker can cover in a d
 MAX_VISIT_PER_DAY = 8  # Maximum number of various hotel a worker can cover within a day
 
 
-def get_distances_matrix(hotels):
+def get_distances_matrix(hotels, workers):
     """Compute the distance matrix (distance between each hotels).
     Returns a triangular matrix and the labels of the hotels.
 
@@ -31,8 +31,9 @@ def get_distances_matrix(hotels):
 
 
     Args: 
-        hotels(list[dict]): list of address, each dict has the struct
+        hotels (list[dict]): list of address, each dict has the struct
             {'address': 'Avenue Winston Churchill', 'postcode': 27000}
+        workers (dict(int: int))
     Returns:
         distances(list[list[int]]): matrix of distances
         labels(dict[int, string]): the index of the address and it's name
@@ -46,7 +47,9 @@ def get_distances_matrix(hotels):
     distances = []
     labels = dict()
     index = 0
-    for hotel1 in hotels:
+    hotels_and_workers = workers + hotels
+
+    for hotel1 in hotels_and_workers:
         src_address = {
             "address": hotel1.get("address"),
             "postcode": hotel1.get("postcode"),
@@ -61,7 +64,7 @@ def get_distances_matrix(hotels):
             src_address.get("address"), src_address.get("postcode")
         )  # Store the address as labels for the node
         index = index + 1
-        for hotel2 in hotels:
+        for hotel2 in hotels_and_workers:
             target_address = {
                 "address": hotel2.get("address"),
                 "postcode": hotel2.get("postcode"),
@@ -85,40 +88,42 @@ def get_distances_matrix(hotels):
 ###########################
 # Problem Data Definition #
 ###########################
-def create_data_model(hotels, number_workers, from_raw_data):
+def create_data_model(hotels, workers, from_raw_data):
     """Creates the data for the example.
     Args:
         hotels(list[dict])
-        number_workers(int): number of Samu Social worker available
+        workers(dict(int: int): number of couple of Samu Social workers available
         from_raw_data(bool):
     """
-    data = {"num_vehicles": number_workers}
+    data = {}
+    n_workers = len(workers)
+    data["num_vehicles"] = n_workers
+
+    # Precise start and end locations of the workers
+    # The number_workers-th first line correspond to the start locations of the workers
+    start_locations = [idx for idx in range(n_workers)]
+
+    # The number_workers-th to the 2*number_workers-th line correspond to the end locations of the workers
+    end_locations = [idx for idx in range(n_workers, 2 * n_workers)]
+    data["start_locations"] = start_locations
+    data["end_locations"] = end_locations
 
     # Matrix of distances between locations.
     if from_raw_data:
         hotels_data = parse_csv(hotels, "hotel", write=False)
     else:
         hotels_data = hotels
-    _distances, labels = get_distances_matrix(hotels_data)
+    _distances, labels = get_distances_matrix(hotels_data, workers)
     data["distances"] = _distances
     data["labels"] = labels
     num_locations = len(_distances)
     data["num_locations"] = num_locations
 
-    # Precise start and end locations of the workers
-    # The number_workers-th first line correspond to the start locations of the workers
-    start_locations = [idx for idx in range(number_workers)]
-
-    # The number_workers-th to the 2*number_workers-th line correspond to the end locations of the workers
-    end_locations = [idx for idx in range(number_workers, 2 * number_workers)]
-    data["start_locations"] = start_locations
-    data["end_locations"] = end_locations
-
     # The problem is to find an assignment of routes to vehicles that has the shortest total distance
     # and such that the total amount a vehicle is carrying never exceeds its capacity. Capacities can be understood
     # as the max number of visits that a worker can do in a day
     demands = [1] * num_locations
-    capacities = [MAX_VISIT_PER_DAY] * number_workers
+    capacities = [MAX_VISIT_PER_DAY] * n_workers
     data["demands"] = demands
     data["vehicle_capacities"] = capacities
 
