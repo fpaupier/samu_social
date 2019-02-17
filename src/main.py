@@ -97,7 +97,15 @@ def _enrich_employees_with_preferred_sectors(employees):
         93: 4,
     }
     for employee in employees:
-        employee['sector'] = sectors_compatibility[employee['area1']]
+        if employee['area1']:
+            employee_preferred_area = int(employee['area1'])
+        else:
+            employee['sector'] = None
+            return
+        if employee_preferred_area not in sectors_compatibility:
+            employee['sector'] = None
+        else:
+            employee['sector'] = sectors_compatibility[int(employee['area1'])]
 
 
 # /!\ Careful: impure function
