@@ -77,6 +77,8 @@ def main():
     for i, v in enumerate(itinerary.values()):
         named_routes[couples[i]] = v
 
+    print_final_solution(named_routes, availabilities[0])
+
     # 4) API/Mail/print to display solutions
     # TODO
 
@@ -159,6 +161,16 @@ def process_employee_availability(employee):
             availability.year, availability.month, availability.day, 0
         )
         return [int(afternoon)]
+
+
+def print_final_solution(named_routes, availabilites):
+    for couple, route in named_routes.items():
+        p1, p2 = couple
+        print("---------------------------------")
+        print("Binome {} and {} should visits hotels: ".format(p1, p2))
+        print("\n".join(route))
+        print("on dates : {}".format(availabilites[couple]))
+        print("---------------------------------")
 
 
 if __name__ == "__main__":
