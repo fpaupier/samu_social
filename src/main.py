@@ -41,13 +41,20 @@ def main():
     _enrich_employees_with_preferred_sectors(employees)
 
     # 1) Call model couple
+    print('=========================================================')
+    print('Start Resolution: Solver 1')
+    print('=========================================================')
     assignments = solve_couples(employees)
 
     # 2) Select a date to focus on / filter model_couples
     # select the point of beginning / ending of each couples
     workers = format_couples_with_positions(employees, assignments[0])
+    print('\n')
 
     # 3) Call solver
+    print('=========================================================')
+    print('Start Resolution: Solver 2')
+    print('=========================================================')
     itinerary = solve_routes(hotels, workers)
     for worker in workers:
         raw_visit_date = str(worker['availabilities'][0])
