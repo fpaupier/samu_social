@@ -42,7 +42,6 @@ def get_distances_matrix(hotels):
     map = Map()
     distances = []
     labels = dict()
-
     index = 0
     for hotel1 in hotels:
         src_address = {
@@ -74,7 +73,7 @@ def get_distances_matrix(hotels):
             distance = int(np.round(distance * 1000))  # Distance expressed in meters
             src_dist.append(distance)
 
-        if (point1 is not None) and (point2 is not None):
+        if src_dist:
             distances.append(src_dist)
     
     return distances, labels
