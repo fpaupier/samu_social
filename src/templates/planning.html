@@ -1,35 +1,42 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <h1>Planning</h1>
+    <link rel="stylesheet" href="planning.css">
+</head>
 <body>
-<h1>Planning</h1>
 
 <form method="post" action="/">
     <input type="submit" name="submit_button" value="Do Plan">
 </form>
 
-<div>
-    {{ data }}
-</div>
-
 {% if data %}
 <div>
-    <table>
+    <table class="blueTable">
         <thead>
-            <tr>
-                <th>Date</th>
-                <th>Persons</th>
-                <th>Hotels</th>
-            </tr>
+        <tr>
+            <th>Visit Date</th>
+            <th></th>
+            <th>Persons</th>
+            <th>Hotels</th>
+            <!--<th>Availabilities</th>-->
+        </tr>
         </thead>
         <tbody>
-            {% for action in data %}
-                <tr>
-                    <!--<td>{{ action['date'] }}</td>-->
-                    <td>{{ action['names']|capitalize }}</td>
-                    <td>{{ action['routes'] }}</td>
-                    <td>{{ action['availabilities'] }}</td>
-                </tr>
-            {% endfor %}
+        {% for action in data %}
+        <tr>
+            <td>{{ action['visit']['date'] }}</td>
+            <td>{{ action['visit']['time'] }}</td>
+            <td>{{ action['names']|capitalize }}</td>
+            <td>
+                {% for address in action['routes'] %}
+                <div>{{ address }}</div>
+                {% endfor %}
+            </td>
+            <!--<td>{{ action['routes'] }}</td>-->
+            <!--<td>{{ action['availabilities'] }}</td>-->
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>

@@ -51,7 +51,10 @@ def main():
     itinerary = solve_routes(hotels, workers)
     for worker in workers:
         raw_visit_date = str(worker['availabilities'][0])
-        worker['visit_date'] = datetime.strptime(raw_visit_date[:-1], '%Y%m%d').date().isoformat()
+        worker['visit'] = {
+            'date': datetime.strptime(raw_visit_date[:-1], '%Y%m%d').date().isoformat(),
+            'time': 'Matin' if raw_visit_date[-1] == 0 else 'Après-Midi'
+        }
 
     for i, v in enumerate(itinerary.values()):
         workers[i]['routes'] = v
