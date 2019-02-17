@@ -103,7 +103,10 @@ def create_data_model(hotels, number_workers, from_raw_data):
     data["num_locations"] = len(_distances)
 
     # Precise start and end locations of the workers
+    # The number_workers-th first line correspond to the start locations of the workers
     start_locations = [idx for idx in range(number_workers)]
+
+    # The number_workers-th to the 2*number_workers-th line correspond to the end locations of the workers
     end_locations = [idx for idx in range(number_workers, 2*number_workers)]
     data["start_locations"] = start_locations
     data["end_locations"] = end_locations
