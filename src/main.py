@@ -44,14 +44,15 @@ def main():
     assignments = solve_couples(employees)
 
     # 2) Select a date to focus on / filter model_couples
-    num_pairs = len(assignments[0])  # TODO: Handle several configurations
-    couples = [couple for couple in assignments[0].keys()]
-
     # select the point of beginning / ending of each couples
     workers = format_couples_with_positions(employees, assignments[0])
 
     # 3) Call solver
     itinerary = solve_routes(hotels, workers)
+    for worker in workers:
+        raw_visit_date = str(worker['availabilities'][0])
+        worker['visit_date'] = datetime.strptime(raw_visit_date[:-1], '%Y%m%d').date().isoformat()
+
     for i, v in enumerate(itinerary.values()):
         workers[i]['routes'] = v
 
