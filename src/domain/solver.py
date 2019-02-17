@@ -92,8 +92,7 @@ def create_data_model(hotels, number_workers, from_raw_data):
         number_workers(int): number of Samu Social worker available
         from_raw_data(bool):
     """
-    data = {}
-    data["num_vehicles"] = number_workers
+    data = {"num_vehicles": number_workers}
 
     # Matrix of distances between locations.
     if from_raw_data:
