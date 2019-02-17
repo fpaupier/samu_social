@@ -34,6 +34,10 @@ def get_distances_matrix(hotels):
         distances(list[list[int]]): matrix of distances
         labels(dict[int, string]): the index of the address and it's name
 
+    Warnings:
+        Function seems to break if size of input hotels is too big ? Returns empty distances
+        that leads to a segmentation fault down the processing pipeline.
+
     """
     map = Map()
     distances = []
@@ -132,9 +136,9 @@ def add_distance_dimension(routing, distance_callback):
 
 
 ###########
-# Printer #
+# FORMATTER #
 ###########
-def print_solution(data, routing, assignment):
+def format_solution(data, routing, assignment):
     """Print routes on console."""
     plan_output = dict()
     for vehicle_id in range(data["num_vehicles"]):
@@ -192,7 +196,7 @@ def solve(hotels, number_workers, from_raw_data=False):
     # Solve the problem.
     assignment = routing.SolveWithParameters(search_parameters)
     if assignment:
-        itinerary = print_solution(data, routing, assignment)
+        itinerary = format_solution(data, routing, assignment)
         return itinerary
     else:
         return None

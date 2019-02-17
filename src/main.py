@@ -5,7 +5,7 @@ from datetime import datetime
 from src.domain.model_couple import solve_couples
 from src.services.csv_reader import CsvReader
 from src.services.map import Map
-from src.domain.solver import solve, print_solution
+from src.domain.solver import solve
 
 
 
@@ -14,7 +14,7 @@ from src.domain.solver import solve, print_solution
 # EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'fichier-salarie.csv')
 
 ### Should not
-HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'enriched-hotels-generalites.csv')
+HOTELS_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'enriched-hotels_subset.csv')
 EMPLOYEES_DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'enriched-fichier-salarie.csv')
 
 
@@ -72,10 +72,8 @@ def main():
     couples = [couple for couple in availabilities[0].keys()]
 
     named_routes = dict()
-    i = 0
-    for k, v in itinerary.items():
+    for i, v in enumerate(itinerary.values()):
         named_routes[couples[i]] = v
-        i = i + 1
 
     return named_routes
 
