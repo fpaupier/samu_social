@@ -63,8 +63,8 @@ def main():
             'time': 'Matin' if raw_visit_date[-1] == 0 else 'Après-Midi'
         }
 
-    for i, v in enumerate(itinerary.values()):
-        workers[i]['routes'] = v
+    for i, v in enumerate(itinerary):
+        workers[i]['routes'] = v[1:-1]
 
     print_final_solution(workers)
 

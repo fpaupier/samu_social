@@ -47,7 +47,7 @@ def get_distances_matrix(hotels, workers):
     distances = []
     labels = dict()
     index = 0
-    hotels_and_workers = workers + hotels
+    hotels_and_workers = workers + workers + hotels
 
     for hotel1 in hotels_and_workers:
         src_address = {
@@ -170,9 +170,8 @@ def add_capacity_constraints(routing, data, demand_callback):
 ###########
 def format_solution(data, routing, assignment):
     """Print routes on console."""
-    plan_output = dict()
+    plan_output = []
     for vehicle_id in range(data["num_vehicles"]):
-        plan_output[vehicle_id] = []
         route = []
         index = routing.Start(vehicle_id)
         route_dist = 0
@@ -188,7 +187,7 @@ def format_solution(data, routing, assignment):
             index = assignment.Value(routing.NextVar(index))
         # Add return address to the route
         route.append((data["labels"].get(routing.IndexToNode(index))))
-        plan_output[vehicle_id] = route
+        plan_output.append(route)
     return plan_output
 
 
