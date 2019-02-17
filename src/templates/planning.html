@@ -7,6 +7,10 @@
     <input type="submit" name="submit_button" value="Do Plan">
 </form>
 
+<div>
+    {{ data }}
+</div>
+
 {% if data %}
 <div>
     <table>
@@ -18,13 +22,14 @@
             </tr>
         </thead>
         <tbody>
-            {% for action in planning %}
+            {% for action in data %}
                 <tr>
-                    <td>action['date']</td>
-                    <td>action['persons']|capitalize</td>
-                    <td>action['hotels']</td>
+                    <!--<td>{{ action['date'] }}</td>-->
+                    <td>{{ action['names']|capitalize }}</td>
+                    <td>{{ action['routes'] }}</td>
+                    <td>{{ action['availabilities'] }}</td>
                 </tr>
-            {% endfor}
+            {% endfor %}
         </tbody>
     </table>
 </div>

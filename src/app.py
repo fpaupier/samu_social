@@ -11,6 +11,8 @@ def display_planning():
     if request.method == 'POST':
         if request.form['submit_button'] == 'Do Plan':
             planning = main()
+            for x in planning:
+                x['names'] = x['name'].replace('_', ' ')
 
     return render_template('planning.html', data=planning)
 
