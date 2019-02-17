@@ -16,6 +16,8 @@ from ortools.constraint_solver import routing_enums_pb2
 from src.services.map import Map
 from src.services.csv_reader import parse_csv
 
+MAX_DISTANCE = 15000  # Maximum distance (meters) that a worker can cover in a day
+
 
 def get_distances_matrix(hotels):
     """Compute the distance matrix (distance between each hotels).
@@ -130,7 +132,7 @@ def create_distance_callback(data):
 def add_distance_dimension(routing, distance_callback):
     """Add Global Span constraint"""
     distance = "Distance"
-    maximum_distance = 300000  # Maximum distance per vehicle expressed in meters
+    maximum_distance = MAX_DISTANCE
     routing.AddDimension(
         distance_callback,
         0,  # null slack
