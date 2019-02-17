@@ -17,6 +17,7 @@ from src.services.map import Map
 from src.services.csv_reader import parse_csv
 
 MAX_DISTANCE = 15000  # Maximum distance (meters) that a worker can cover in a day
+MAX_VISIT_PER_DAY = 8  # Maximum number of various hotel a worker can cover within a day
 
 
 def get_distances_matrix(hotels):
@@ -51,7 +52,7 @@ def get_distances_matrix(hotels):
             "postcode": hotel1.get("postcode"),
         }
         # point1 = map.point(src_address)
-        point1 = hotel1['point']
+        point1 = hotel1["point"]
         src_dist = []
         if not point1:
             continue
@@ -66,7 +67,7 @@ def get_distances_matrix(hotels):
                 "postcode": hotel2.get("postcode"),
             }
             # point2 = map.point(target_address)
-            point2 = hotel2['point']
+            point2 = hotel2["point"]
 
             if not point2:
                 continue
@@ -77,7 +78,7 @@ def get_distances_matrix(hotels):
 
         if src_dist:
             distances.append(src_dist)
-    
+
     return distances, labels
 
 
@@ -102,16 +103,26 @@ def create_data_model(hotels, number_workers, from_raw_data):
     _distances, labels = get_distances_matrix(hotels_data)
     data["distances"] = _distances
     data["labels"] = labels
-    data["num_locations"] = len(_distances)
+    num_locations = len(_distances)
+    data["num_locations"] = num_locations
 
     # Precise start and end locations of the workers
     # The number_workers-th first line correspond to the start locations of the workers
     start_locations = [idx for idx in range(number_workers)]
 
     # The number_workers-th to the 2*number_workers-th line correspond to the end locations of the workers
-    end_locations = [idx for idx in range(number_workers, 2*number_workers)]
+    end_locations = [idx for idx in range(number_workers, 2 * number_workers)]
     data["start_locations"] = start_locations
     data["end_locations"] = end_locations
+
+    # The problem is to find an assignment of routes to vehicles that has the shortest total distance
+    # and such that the total amount a vehicle is carrying never exceeds its capacity. Capacities can be understood
+    # as the max number of visits that a worker can do in a day
+    demands = [1] * num_locations
+    capacities = [MAX_VISIT_PER_DAY] * number_workers
+    data["demands"] = demands
+    data["vehicle_capacities"] = capacities
+
     return data
 
 
@@ -129,20 +140,25 @@ def create_distance_callback(data):
     return distance_callback
 
 
-def add_distance_dimension(routing, distance_callback):
-    """Add Global Span constraint"""
-    distance = "Distance"
-    maximum_distance = MAX_DISTANCE
-    routing.AddDimension(
-        distance_callback,
-        0,  # null slack
-        maximum_distance,
+def create_demand_callback(data):
+    """Creates callback to get demands at each location."""
+
+    def demand_callback(from_node, to_node):
+        return data["demands"][from_node]
+
+    return demand_callback
+
+
+def add_capacity_constraints(routing, data, demand_callback):
+    """Adds capacity constraint"""
+    capacity = "Capacity"
+    routing.AddDimensionWithVehicleCapacity(
+        demand_callback,
+        0,  # null capacity slack
+        data["vehicle_capacities"],  # vehicle maximum capacities
         True,  # start cumul to zero
-        distance,
+        capacity,
     )
-    distance_dimension = routing.GetDimensionOrDie(distance)
-    # Try to minimize the max distance among vehicles.
-    distance_dimension.SetGlobalSpanCostCoefficient(100)
 
 
 ###########
@@ -192,17 +208,25 @@ def solve_routes(hotels, number_workers, from_raw_data=False):
     data = create_data_model(hotels, number_workers, from_raw_data)
     # Create Routing Model
     routing = pywrapcp.RoutingModel(
-        data["num_locations"], data["num_vehicles"], data["start_locations"], data["end_locations"]
+        data["num_locations"],
+        data["num_vehicles"],
+        data["start_locations"],
+        data["end_locations"],
     )
     # Define weight of each edge
     distance_callback = create_distance_callback(data)
     routing.SetArcCostEvaluatorOfAllVehicles(distance_callback)
-    add_distance_dimension(routing, distance_callback)
+
+    # Add Capacity constraint
+    demand_callback = create_demand_callback(data)
+    add_capacity_constraints(routing, data, demand_callback)
+
     # Setting first solution heuristic (cheapest addition).
     search_parameters = pywrapcp.RoutingModel.DefaultSearchParameters()
     search_parameters.first_solution_strategy = (
         routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
-    )  # pylint: disable=no-member
+    )
+
     # Solve the problem.
     assignment = routing.SolveWithParameters(search_parameters)
     if assignment:

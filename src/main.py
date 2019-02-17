@@ -19,30 +19,6 @@ EMPLOYEES_DATA_FILE = os.path.join(
 )
 
 
-def format_solution(data, routing, assignment, couples):
-    """Print routes on console."""
-    total_distance = 0
-    for vehicle_id in range(data["num_vehicles"]):
-        index = routing.Start(vehicle_id)
-        plan_output = "Route for vehicle {}:\n".format(couples[vehicle_id])
-        route_dist = 0
-        while not routing.IsEnd(index):
-            node_index = routing.IndexToNode(index)
-            next_node_index = routing.IndexToNode(
-                assignment.Value(routing.NextVar(index))
-            )
-            route_dist += routing.GetArcCostForVehicle(
-                node_index, next_node_index, vehicle_id
-            )
-            plan_output += " {0} ->".format(data["labels"].get(node_index))
-            index = assignment.Value(routing.NextVar(index))
-        plan_output += " {}\n".format(data["labels"].get(routing.IndexToNode(index)))
-        plan_output += "Distance of route: {}m\n".format(route_dist)
-        print(plan_output)
-        total_distance += route_dist
-    print("Total distance of all routes: {}m".format(total_distance))
-
-
 def main():
     csv_reader = CsvReader()
 
@@ -82,8 +58,6 @@ def main():
     # 4) API/Mail/print to display solutions
     # TODO
 
-    # Print for debug purposes
-    [print("{}\n".format(item)) for item in named_routes.items()]
     return named_routes
 
 
@@ -99,15 +73,15 @@ def _enrich_employees_with_preferred_sectors(employees):
         93: 4,
     }
     for employee in employees:
-        if employee['area1']:
-            employee_preferred_area = int(employee['area1'])
+        if employee["area1"]:
+            employee_preferred_area = int(employee["area1"])
         else:
-            employee['sector'] = None
+            employee["sector"] = None
             return
         if employee_preferred_area not in sectors_compatibility:
-            employee['sector'] = None
+            employee["sector"] = None
         else:
-            employee['sector'] = sectors_compatibility[int(employee['area1'])]
+            employee["sector"] = sectors_compatibility[int(employee["area1"])]
 
 
 # /!\ Careful: impure function
