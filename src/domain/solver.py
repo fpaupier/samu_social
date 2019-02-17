@@ -165,7 +165,7 @@ def format_solution(data, routing, assignment):
 ########
 # Main #
 ########
-def solve(hotels, number_workers, from_raw_data=False):
+def solve_routes(hotels, number_workers, from_raw_data=False):
     """
     Entry point of the program
 
@@ -223,4 +223,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    solve(args.source, args.number_workers, from_raw_data=True)
+    solve_routes(args.source, args.number_workers, from_raw_data=True)
