@@ -16,7 +16,7 @@
         <thead>
         <tr>
             <th>Visit Date</th>
-            <th></th>
+            <!--<th></th>-->
             <th>Persons</th>
             <th>Hotels</th>
             <!--<th>Availabilities</th>-->
@@ -25,8 +25,11 @@
         <tbody>
         {% for action in data %}
         <tr>
-            <td>{{ action['visit']['date'] }}</td>
-            <td>{{ action['visit']['time'] }}</td>
+            <td>
+            {% for stuff in action['visits'] %}
+                <div>{{ stuff['date'] }} || {{ stuff['time'] }}</div>
+            {% endfor %}
+            </td>
             <td>{{ action['names']|capitalize }}</td>
             <td>
                 {% for address in action['routes'] %}

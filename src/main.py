@@ -56,12 +56,12 @@ def main():
     print('Start Resolution: Solver 2')
     print('=========================================================')
     itinerary = solve_routes(hotels, workers)
+
     for worker in workers:
-        raw_visit_date = str(worker['availabilities'][0])
-        worker['visit'] = {
-            'date': datetime.strptime(raw_visit_date[:-1], '%Y%m%d').date().isoformat(),
-            'time': 'Matin' if raw_visit_date[-1] == 0 else 'Après-Midi'
-        }
+        worker['visits'] = [{
+            'date': datetime.strptime(str(raw_visit_date)[:-1], '%Y%m%d').date().isoformat(),
+            'time': 'Matin' if int(str(raw_visit_date)[-1]) == 0 else 'Après-Midi'}
+            for raw_visit_date in worker['availabilities']]
 
     for i, v in enumerate(itinerary):
         workers[i]['routes'] = v[1:-1]
@@ -70,7 +70,6 @@ def main():
 
     # 4) API/Mail/print to display solutions
     # TODO
-
     return workers
 
 
@@ -181,7 +180,7 @@ def print_final_solution(workers):
                       worker.get('address'),
                       worker.get('postcode'),))
         print("\n".join(worker.get('routes')))
-        print("on dates : {}".format(worker.get('availabilities')))
+        print("on dates : {}".format(worker.get('visits')))
         print("---------------------------------")
 
 
