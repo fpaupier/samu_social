@@ -60,7 +60,7 @@ def main():
     for worker in workers:
         worker['visits'] = [{
             'date': datetime.strptime(str(raw_visit_date)[:-1], '%Y%m%d').date().isoformat(),
-            'time': 'Matin' if str(raw_visit_date)[-1] == 0 else 'Après-Midi'}
+            'time': 'Matin' if int(str(raw_visit_date)[-1]) == 0 else 'Après-Midi'}
             for raw_visit_date in worker['availabilities']]
 
     for i, v in enumerate(itinerary):
@@ -70,7 +70,6 @@ def main():
 
     # 4) API/Mail/print to display solutions
     # TODO
-
     return workers
 
 
