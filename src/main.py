@@ -62,6 +62,8 @@ def main():
 
     employees = _enrich_employees_with_availabilities(employees)
 
+    _enrich_employees_with_preferred_sectors(employees)
+
     # 1) Call model couple
     availabilities = solve_couples(employees)
 
@@ -78,6 +80,21 @@ def main():
     # 4) API/Mail/print to display solutions
     # TODO
     return named_routes
+
+
+def _enrich_employees_with_preferred_sectors(employees):
+    sectors_compatibility = {
+        75: 1,
+        77: 2,
+        91: 2,
+        94: 2,
+        78: 3,
+        92: 3,
+        95: 3,
+        93: 4,
+    }
+    for employee in employees:
+        employee['sector'] = sectors_compatibility[employee['area1']]
 
 
 # /!\ Careful: impure function
