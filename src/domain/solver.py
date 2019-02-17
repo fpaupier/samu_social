@@ -90,17 +90,23 @@ def create_data_model(hotels, number_workers, from_raw_data):
         from_raw_data(bool):
     """
     data = {}
-    # Array of distances between locations.
+    data["num_vehicles"] = number_workers
+
+    # Matrix of distances between locations.
     if from_raw_data:
         hotels_data = parse_csv(hotels, "hotel", write=False)
     else:
         hotels_data = hotels
     _distances, labels = get_distances_matrix(hotels_data)
     data["distances"] = _distances
-    data["num_locations"] = len(_distances)
-    data["num_vehicles"] = number_workers
-    data["depot"] = 0
     data["labels"] = labels
+    data["num_locations"] = len(_distances)
+
+    # Precise start and end locations of the workers
+    start_locations = [idx for idx in range(number_workers)]
+    end_locations = [idx for idx in range(number_workers, 2*number_workers)]
+    data["start_locations"] = start_locations
+    data["end_locations"] = end_locations
     return data
 
 
@@ -181,7 +187,7 @@ def solve_routes(hotels, number_workers, from_raw_data=False):
     data = create_data_model(hotels, number_workers, from_raw_data)
     # Create Routing Model
     routing = pywrapcp.RoutingModel(
-        data["num_locations"], data["num_vehicles"], data["depot"]
+        data["num_locations"], data["num_vehicles"], data["start_locations"], data["end_locations"]
     )
     # Define weight of each edge
     distance_callback = create_distance_callback(data)
