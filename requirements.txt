@@ -2,3 +2,4 @@ requests>=2.21.0
 ortools==6.7.4973
 protobuf==3.5.1
 numpy>=1.16.1
+Flask==1.0.2
