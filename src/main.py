@@ -41,24 +41,48 @@ def main():
     _enrich_employees_with_preferred_sectors(employees)
 
     # 1) Call model couple
-    availabilities = solve_couples(employees)
+    assignments = solve_couples(employees)
 
     # 2) Select a date to focus on / filter model_couples
-    num_pairs = len(availabilities[0])  # TODO: Handle several configurations
-    couples = [couple for couple in availabilities[0].keys()]
+    num_pairs = len(assignments[0])  # TODO: Handle several configurations
+    couples = [couple for couple in assignments[0].keys()]
+
+    # select the point of beginning / ending of each couples
+    workers = format_couples_with_positions(employees, assignments[0])
 
     # 3) Call solver
-    itinerary = solve_routes(hotels, num_pairs)
-    named_routes = dict()
+    itinerary = solve_routes(hotels, workers)
     for i, v in enumerate(itinerary.values()):
-        named_routes[couples[i]] = v
+        workers[i]['routes'] = v
 
-    print_final_solution(named_routes, availabilities[0])
+    print_final_solution(workers)
 
     # 4) API/Mail/print to display solutions
     # TODO
 
-    return named_routes
+    return workers
+
+
+def format_couples_with_positions(employees, assignements):
+    workers = []
+    address_per_person = {p['name']: p['address'] for p in employees}
+    postcode_per_person = {p['name']: p['postcode'] for p in employees}
+
+    for couple, (availability, sector) in assignements.items():
+        p1, p2 = couple
+        workers.append({"name": "{}_and_{}".format(p1, p2),
+                        "address": address_per_person[p1],
+                        "postcode": postcode_per_person[p1],
+                        "point": SECTOR_COORDINATES[sector],
+                        "sector": sector,
+                        "availabilities": availability})
+    return workers
+
+
+SECTOR_COORDINATES = {1: {'latitude': 48.852969, 'longitude' : 2.349894},
+                      2: {'latitude': 48.582882, 'longitude': 2.499829},
+                      3: {'latitude': 48.938204, 'longitude': 1.997205},
+                      4: {'latitude': 48.909555, 'longitude': 2.445373}}
 
 
 def _enrich_employees_with_preferred_sectors(employees):
@@ -137,13 +161,16 @@ def process_employee_availability(employee):
         return [int(afternoon)]
 
 
-def print_final_solution(named_routes, availabilites):
-    for couple, route in named_routes.items():
-        p1, p2 = couple
+def print_final_solution(workers):
+    for i, worker in enumerate(workers):
         print("---------------------------------")
-        print("Binome {} and {} should visits hotels: ".format(p1, p2))
-        print("\n".join(route))
-        print("on dates : {}".format(availabilites[couple]))
+        print("Binome {} from sector {} , address {} {} should visits hotels: "
+              .format(worker.get('name'),
+                      worker.get('sector'),
+                      worker.get('address'),
+                      worker.get('postcode'),))
+        print("\n".join(worker.get('routes')))
+        print("on dates : {}".format(worker.get('availabilities')))
         print("---------------------------------")
 
 

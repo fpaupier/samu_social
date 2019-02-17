@@ -197,9 +197,9 @@ def save_solutions(solver, list_of_couples, couples, dispos_per_couples, sector_
     assigned_couples = [(i, couple) for i, couple in enumerate(list_of_couples) if solver.Value(couples[i])]
 
     for i, couple in assigned_couples:
-        assigments[tuple(couple)] = dispos_per_couples[i]
         p1, p2 = couple
         sector = sector_per_person[p1] & sector_per_person[p2]
+        assigments[tuple(couple)] = (dispos_per_couples[i], sector)
         print('{} assigned to {} with dispo {} and sector {}'.format(p1, p2, dispos_per_couples[i], sector))
     return assigments
 
