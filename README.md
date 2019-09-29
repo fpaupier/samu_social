@@ -1,6 +1,10 @@
-# Samu Social Hackathon at the Hive
+# Samu Social Hackathon 
 
-# Context
+Hackathon organized at the [Hive](https://www.hackathon.com/event/the-data-hive-hackathon---when-data-meets-social-good-52493822436)
+in February 2019.
+
+
+## Context
 
 To help the [_Samu Social de Paris_](https://www.samusocial.paris/) visit the different hotels we propose a 
 tool to help the visit planing process. 
@@ -33,3 +37,6 @@ https://adresse.data.gouv.fr/api (to get `long` and `lat` from an address)
 
 Google [OR-Tools](https://developers.google.com/optimization/routing/) for optimisation 
 and especially routing problem.
+
+## Notes
+This project is no longer updated.
